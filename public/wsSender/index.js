@@ -38,7 +38,7 @@ $(function () {
 
         $.ajax({
             type: 'post',
-            url: 'http://localhost:4000/wsSender/receiver',
+            url: '/wsSender/receiver',
             data: { 'info': JSON.stringify(info) },
             success: function (data) {
                 console.log(data);
@@ -51,6 +51,7 @@ $(function () {
 
     let t = 500;
 
+    console.log("Activado el sender")
     setInterval(function () {
         $("#send").click();
         t = Math.random() * 200 + 300;
