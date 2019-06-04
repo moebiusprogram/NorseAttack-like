@@ -5,11 +5,11 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 module.exports = {
     devtool: false,
     entry: {
-        bundle: './public/app/Main.js',
+        bundle: './public/norse/app/Main.js',
         vendor:['react', 'react-dom', 'echarts-gl', 'echarts', 'jquery', 'zrender', 'leaflet']
     },
     output: {
-        path: __dirname + '/public/dist/',
+        path: __dirname + '/public/norse/dist/',
         filename: '[name].js',
     },
     module: {

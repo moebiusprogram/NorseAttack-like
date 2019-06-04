@@ -12,6 +12,10 @@ export default class App extends Component {
     constructor(props) {
         super(props);
 
+        this.COUNTRIES = ['American', 'China', 'United Kingdom', 'Japan', 'France'];
+        this.SERVICE_TYPE = ['smtp', 'telnet', 'rfb', 'http-alt', 'ms-sql-s'];
+        this.COMPANY = ['GOOGLE', 'MICROSOFT', 'HUAWEI', 'BAIDU', 'CHINANET'];
+
         this.state = {
             nodes: {},
             edges: [],
@@ -36,8 +40,10 @@ export default class App extends Component {
         let socket = io('http://localhost:4000');
         window.webSocket = socket; // 存入全局变量.
 
+
         socket.on('connect', (c) => {
             console.log("连接成功..." + new Date().getTime());
+            console.log("Conectado")
             socket.emit('hello', 'hello world!');
         });
 
@@ -54,7 +60,64 @@ export default class App extends Component {
         });
     }
 
+    getUpcommingAttacks = () => {
+        let info = {
+            'from': {
+                // 'lat': $('#flat').val(),
+                // 'lng': $('#flng').val()
+                'lat': Math.random() * 160 - 80,
+                'lng': Math.random() * 360 - 180,
+            },
+            'to': {
+                // 'lat': $('#tlat').val(),
+                // 'lng': $('#tlng').val()
+                'lat': Math.random() * 160 - 80,
+                'lng': Math.random() * 360 - 180
+            },
+            'origin': {
+                'N': Math.floor(Math.random() * 60),
+                'COUNTRY': this.COUNTRIES[Math.floor(Math.random() * this.COUNTRIES.length)]
+            },
+            'target': {
+                'N': Math.floor(Math.random() * 60),
+                'COUNTRY': this.COUNTRIES[Math.floor(Math.random() * this.COUNTRIES.length)]
+            },
+            'type': {
+                'N': Math.floor(Math.random() * 60),
+                'PORT': Math.floor(Math.random() * 0xffff),
+                'SERVICE TYPE': this.SERVICE_TYPE[Math.floor(Math.random() * this.SERVICE_TYPE.length)]
+            },
+            'live': {
+                'TIMESTAMP': new Date().toString(),
+                'ATTACKER': this.COMPANY[Math.floor(Math.random() * this.COMPANY.length)]
+            }
+        }
+
+        let { origin, target, type, live } = info;
+        let { origins, targets, types, attacks } = this.state;
+
+        origins.push(origin);
+        targets.push(target);
+        types.push(type);
+        attacks.push(live);
+
+        [origins, targets, types, attacks].forEach((a) => {
+            if(a.length >= 8) {
+                a.shift();
+            }
+        });
+
+        this.setState({
+            'origins': origins,
+            'targets': targets,
+            'types': types,
+            'attacks': attacks
+        });
+    }
+
     componentDidMount() {
+
+        
         window.webSocket.on('link', (data) => {
             let { origin, target, type, live } = JSON.parse(data.info);
             let { origins, targets, types, attacks } = this.state;
@@ -77,6 +140,15 @@ export default class App extends Component {
                 'attacks': attacks
             });
         });
+        let t = 500;
+
+        //let intervalID = setInterval( this.getUpcommingAttacks, 8000 )
+
+        let intervalID = setInterval( () => {
+            this.getUpcommingAttacks()
+            t = Math.random() * 200 + 300;
+        }, 8000);
+        this.setState({intervalID: intervalID})
     }
 
     componentWillUnMount() {

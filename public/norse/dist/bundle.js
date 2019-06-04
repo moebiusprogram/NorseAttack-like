@@ -10803,6 +10803,73 @@ var App = function (_Component) {
 
         var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
+        _this.getUpcommingAttacks = function () {
+            var info = {
+                'from': {
+                    // 'lat': $('#flat').val(),
+                    // 'lng': $('#flng').val()
+                    'lat': Math.random() * 160 - 80,
+                    'lng': Math.random() * 360 - 180
+                },
+                'to': {
+                    // 'lat': $('#tlat').val(),
+                    // 'lng': $('#tlng').val()
+                    'lat': Math.random() * 160 - 80,
+                    'lng': Math.random() * 360 - 180
+                },
+                'origin': {
+                    'N': Math.floor(Math.random() * 60),
+                    'COUNTRY': _this.COUNTRIES[Math.floor(Math.random() * _this.COUNTRIES.length)]
+                },
+                'target': {
+                    'N': Math.floor(Math.random() * 60),
+                    'COUNTRY': _this.COUNTRIES[Math.floor(Math.random() * _this.COUNTRIES.length)]
+                },
+                'type': {
+                    'N': Math.floor(Math.random() * 60),
+                    'PORT': Math.floor(Math.random() * 0xffff),
+                    'SERVICE TYPE': _this.SERVICE_TYPE[Math.floor(Math.random() * _this.SERVICE_TYPE.length)]
+                },
+                'live': {
+                    'TIMESTAMP': new Date().toString(),
+                    'ATTACKER': _this.COMPANY[Math.floor(Math.random() * _this.COMPANY.length)]
+                }
+            };
+
+            var origin = info.origin,
+                target = info.target,
+                type = info.type,
+                live = info.live;
+            var _this$state = _this.state,
+                origins = _this$state.origins,
+                targets = _this$state.targets,
+                types = _this$state.types,
+                attacks = _this$state.attacks;
+
+
+            origins.push(origin);
+            targets.push(target);
+            types.push(type);
+            attacks.push(live);
+
+            [origins, targets, types, attacks].forEach(function (a) {
+                if (a.length >= 8) {
+                    a.shift();
+                }
+            });
+
+            _this.setState({
+                'origins': origins,
+                'targets': targets,
+                'types': types,
+                'attacks': attacks
+            });
+        };
+
+        _this.COUNTRIES = ['American', 'China', 'United Kingdom', 'Japan', 'France'];
+        _this.SERVICE_TYPE = ['smtp', 'telnet', 'rfb', 'http-alt', 'ms-sql-s'];
+        _this.COMPANY = ['GOOGLE', 'MICROSOFT', 'HUAWEI', 'BAIDU', 'CHINANET'];
+
         _this.state = {
             nodes: {},
             edges: [],
@@ -10830,8 +10897,10 @@ var App = function (_Component) {
             var socket = (0, _socket2.default)('http://localhost:4000');
             window.webSocket = socket; // 存入全局变量.
 
+
             socket.on('connect', function (c) {
                 console.log("连接成功..." + new Date().getTime());
+                console.log("Conectado");
                 socket.emit('hello', 'hello world!');
             });
 
@@ -10852,38 +10921,37 @@ var App = function (_Component) {
         value: function componentDidMount() {
             var _this2 = this;
 
-            window.webSocket.on('link', function (data) {
-                var _JSON$parse = JSON.parse(data.info),
-                    origin = _JSON$parse.origin,
-                    target = _JSON$parse.target,
-                    type = _JSON$parse.type,
-                    live = _JSON$parse.live;
-
-                var _state = _this2.state,
-                    origins = _state.origins,
-                    targets = _state.targets,
-                    types = _state.types,
-                    attacks = _state.attacks;
-
-
-                origins.push(origin);
+            /*
+            window.webSocket.on('link', (data) => {
+                let { origin, target, type, live } = JSON.parse(data.info);
+                let { origins, targets, types, attacks } = this.state;
+                 origins.push(origin);
                 targets.push(target);
                 types.push(type);
                 attacks.push(live);
-
-                [origins, targets, types, attacks].forEach(function (a) {
-                    if (a.length >= 8) {
+                 [origins, targets, types, attacks].forEach((a) => {
+                    if(a.length >= 8) {
                         a.shift();
                     }
                 });
-
-                _this2.setState({
+                 this.setState({
                     'origins': origins,
                     'targets': targets,
                     'types': types,
                     'attacks': attacks
                 });
             });
+            */
+            var t = 500;
+
+            //let intervalID = setInterval( this.getUpcommingAttacks, 8000 )
+
+            var intervalID = setInterval(function () {
+                _this2.getUpcommingAttacks();
+                t = Math.random() * 200 + 300;
+                console.log("interval time:", t);
+            }, 8000);
+            this.setState({ intervalID: intervalID });
         }
     }, {
         key: 'componentWillUnMount',

@@ -1,6 +1,6 @@
 import L from 'leaflet';
 // import Proj4Leaflet from 'proj4leaflet';
-import '../../../node_modules/leaflet/dist/leaflet.css';
+import '../../../../node_modules/leaflet/dist/leaflet.css';
 
 export default class Map {
     constructor(opts) {
