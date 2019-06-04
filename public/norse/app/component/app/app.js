@@ -33,7 +33,7 @@ export default class App extends Component {
 
     componentWillMount() {
         // add SocketIO.
-        let socket = io('/norse');
+        let socket = io('http://localhost:4000');
         window.webSocket = socket; // 存入全局变量.
 
         socket.on('connect', (c) => {
