@@ -17,6 +17,7 @@ export default class App extends Component {
         this.COMPANY = ['GOOGLE', 'MICROSOFT', 'HUAWEI', 'BAIDU', 'CHINANET'];
 
         this.state = {
+            actualInfo: { error: true },
             nodes: {},
             edges: [],
             flight: [],
@@ -111,7 +112,8 @@ export default class App extends Component {
             'origins': origins,
             'targets': targets,
             'types': types,
-            'attacks': attacks
+            'attacks': attacks,
+            'actualInfo': info
         });
     }
 
@@ -140,14 +142,14 @@ export default class App extends Component {
                 'attacks': attacks
             });
         });
-        let t = 500;
+        let t = 8000;
 
         //let intervalID = setInterval( this.getUpcommingAttacks, 8000 )
 
         let intervalID = setInterval( () => {
             this.getUpcommingAttacks()
             t = Math.random() * 200 + 300;
-        }, 8000);
+        }, t);
         this.setState({intervalID: intervalID})
     }
 
@@ -158,9 +160,11 @@ export default class App extends Component {
     }
 
     render() {
+
+        //console.log( "render state", this.state.actualInfo )
         return (
             <div className='app'>
-                <Attack />
+                <Attack  info={ this.state.actualInfo } />
                 <InfoContainer>
                     <InfoPanel items={this.state.origins} title='ATTACK ORIGINS' />
                     <InfoPanel items={this.state.types} title='ATTACK TYPES' />

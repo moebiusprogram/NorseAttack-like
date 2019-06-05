@@ -10862,7 +10862,8 @@ var App = function (_Component) {
                 'origins': origins,
                 'targets': targets,
                 'types': types,
-                'attacks': attacks
+                'attacks': attacks,
+                'actualInfo': info
             });
         };
 
@@ -10871,6 +10872,7 @@ var App = function (_Component) {
         _this.COMPANY = ['GOOGLE', 'MICROSOFT', 'HUAWEI', 'BAIDU', 'CHINANET'];
 
         _this.state = {
+            actualInfo: { error: true },
             nodes: {},
             edges: [],
             flight: [],
@@ -10921,36 +10923,46 @@ var App = function (_Component) {
         value: function componentDidMount() {
             var _this2 = this;
 
-            /*
-            window.webSocket.on('link', (data) => {
-                let { origin, target, type, live } = JSON.parse(data.info);
-                let { origins, targets, types, attacks } = this.state;
-                 origins.push(origin);
+            window.webSocket.on('link', function (data) {
+                var _JSON$parse = JSON.parse(data.info),
+                    origin = _JSON$parse.origin,
+                    target = _JSON$parse.target,
+                    type = _JSON$parse.type,
+                    live = _JSON$parse.live;
+
+                var _state = _this2.state,
+                    origins = _state.origins,
+                    targets = _state.targets,
+                    types = _state.types,
+                    attacks = _state.attacks;
+
+
+                origins.push(origin);
                 targets.push(target);
                 types.push(type);
                 attacks.push(live);
-                 [origins, targets, types, attacks].forEach((a) => {
-                    if(a.length >= 8) {
+
+                [origins, targets, types, attacks].forEach(function (a) {
+                    if (a.length >= 8) {
                         a.shift();
                     }
                 });
-                 this.setState({
+
+                _this2.setState({
                     'origins': origins,
                     'targets': targets,
                     'types': types,
                     'attacks': attacks
                 });
             });
-            */
-            var t = 500;
+            var t = 8000;
 
             //let intervalID = setInterval( this.getUpcommingAttacks, 8000 )
 
             var intervalID = setInterval(function () {
                 _this2.getUpcommingAttacks();
                 t = Math.random() * 200 + 300;
-                console.log("interval time:", t);
-            }, 8000);
+            }, t);
             this.setState({ intervalID: intervalID });
         }
     }, {
@@ -10963,10 +10975,12 @@ var App = function (_Component) {
     }, {
         key: 'render',
         value: function render() {
+
+            //console.log( "render state", this.state.actualInfo )
             return _react2.default.createElement(
                 'div',
                 { className: 'app' },
-                _react2.default.createElement(_Attack2.default, null),
+                _react2.default.createElement(_Attack2.default, { info: this.state.actualInfo }),
                 _react2.default.createElement(
                     _InfoContainer2.default,
                     null,
@@ -11294,6 +11308,80 @@ var App = function (_PureComponent) {
 
         var _this2 = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
+        _this2._receiveData = function () {
+            var _this = _this2;
+
+            //console.log(this.props.info )
+            if (_this2.props.info.error) return;
+
+            //let { from, to, origin, target, type, live } = JSON.parse(data.info);
+            var _this2$props$info = _this2.props.info,
+                from = _this2$props$info.from,
+                to = _this2$props$info.to,
+                origin = _this2$props$info.origin,
+                target = _this2$props$info.target,
+                type = _this2$props$info.type,
+                live = _this2$props$info.live;
+
+
+            var fpoint = _this.map.latLngToContainerPoint([from.lat, from.lng]);
+            var tpoint = _this.map.latLngToContainerPoint([to.lat, to.lng]);
+
+            var fp = new _AnimatePoint2.default({
+                r: Math.random() * 10 + 10,
+                x: fpoint.x,
+                y: fpoint.y,
+                lineWidth: 1,
+                fill: _Config2.default.gradient,
+                loop: false,
+                callback: function callback() {
+                    _this.zr.remove(fp);
+                }
+            }).render();
+
+            var tp = new _AnimatePoint2.default({
+                r: Math.random() * 10 + 10,
+                x: tpoint.x,
+                y: tpoint.y,
+                lineWidth: 1,
+                fill: _Config2.default.gradient,
+                loop: false,
+                callback: function callback() {
+                    _this.zr.remove(tp);
+                }
+            }).render();
+
+            var link = new _Link2.default({
+                from: {
+                    x: fpoint.x,
+                    y: fpoint.y
+                },
+                to: {
+                    x: tpoint.x,
+                    y: tpoint.y
+                },
+                stroke: 'rgba(0, 0, 0, 0)'
+            }).render();
+
+            var flightLine = null;
+            var attackLine = new _AttackLine2.default({
+                link: link,
+                size: 3,
+                loop: false,
+                callback: function callback() {
+                    _this.zr.remove(link);
+                    _this.zr.remove(flightLine);
+                }
+            });
+
+            flightLine = attackLine.render();
+            _this.zr.add(flightLine);
+            _this.zr.add(fp);
+            _this.zr.add(tp);
+        };
+
+        _this2.info = _this2.props.info;
+
         _this2.zr = null;
         _this2.map = null;
 
@@ -11305,6 +11393,11 @@ var App = function (_PureComponent) {
     }
 
     _createClass(App, [{
+        key: 'componentWillMount',
+        value: function componentWillMount() {
+            //this._receiveData();
+        }
+    }, {
         key: 'componentDidMount',
         value: function componentDidMount() {
             this._drawMap();
@@ -11317,13 +11410,16 @@ var App = function (_PureComponent) {
             });
 
             // this._drawAttack();
-            this._receiveData();
+
 
             window.addEventListener('resize', this._windowResize);
         }
     }, {
         key: 'componentDidUpdate',
-        value: function componentDidUpdate(prevProps, prevState) {}
+        value: function componentDidUpdate(prevProps, prevState) {
+            this._receiveData();
+            //console.log("props update",this.props)
+        }
     }, {
         key: 'componentWillUnmount',
         value: function componentWillUnmount() {
@@ -11501,89 +11597,12 @@ var App = function (_PureComponent) {
          */
 
     }, {
-        key: '_receiveData',
-        value: function _receiveData() {
-            var _this = this;
+        key: '_windowResize',
 
-            if (window.webSocket) {
-                //后台触发link事件,传送关联信息.
-                window.webSocket.on('link', function (data) {
-                    if (!data) {
-                        return;
-                    }
-
-                    var _JSON$parse = JSON.parse(data.info),
-                        from = _JSON$parse.from,
-                        to = _JSON$parse.to,
-                        origin = _JSON$parse.origin,
-                        target = _JSON$parse.target,
-                        type = _JSON$parse.type,
-                        live = _JSON$parse.live;
-
-                    var fpoint = _this.map.latLngToContainerPoint([from.lat, from.lng]);
-                    var tpoint = _this.map.latLngToContainerPoint([to.lat, to.lng]);
-
-                    var fp = new _AnimatePoint2.default({
-                        r: Math.random() * 10 + 10,
-                        x: fpoint.x,
-                        y: fpoint.y,
-                        lineWidth: 1,
-                        fill: _Config2.default.gradient,
-                        loop: false,
-                        callback: function callback() {
-                            _this.zr.remove(fp);
-                        }
-                    }).render();
-
-                    var tp = new _AnimatePoint2.default({
-                        r: Math.random() * 10 + 10,
-                        x: tpoint.x,
-                        y: tpoint.y,
-                        lineWidth: 1,
-                        fill: _Config2.default.gradient,
-                        loop: false,
-                        callback: function callback() {
-                            _this.zr.remove(tp);
-                        }
-                    }).render();
-
-                    var link = new _Link2.default({
-                        from: {
-                            x: fpoint.x,
-                            y: fpoint.y
-                        },
-                        to: {
-                            x: tpoint.x,
-                            y: tpoint.y
-                        },
-                        stroke: 'rgba(0, 0, 0, 0)'
-                    }).render();
-
-                    var flightLine = null;
-                    var attackLine = new _AttackLine2.default({
-                        link: link,
-                        size: 3,
-                        loop: false,
-                        callback: function callback() {
-                            _this.zr.remove(link);
-                            _this.zr.remove(flightLine);
-                        }
-                    });
-
-                    flightLine = attackLine.render();
-                    _this.zr.add(flightLine);
-                    _this.zr.add(fp);
-                    _this.zr.add(tp);
-                });
-            }
-        }
 
         /**
          * 窗口大小改变, 重置zr大小.
          */
-
-    }, {
-        key: '_windowResize',
         value: function _windowResize() {
             var _window = window,
                 innerHeight = _window.innerHeight,

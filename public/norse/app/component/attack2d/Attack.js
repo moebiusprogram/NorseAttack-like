@@ -15,6 +15,11 @@ import './attack.scss';
 export default class App extends PureComponent {
     constructor(props) {
         super(props);
+
+        
+
+        this.info = this.props.info
+
         this.zr = null;
         this.map = null;
 
@@ -22,6 +27,10 @@ export default class App extends PureComponent {
         this._drawAttack = this._drawAttack.bind(this);
         this._receiveData = this._receiveData.bind(this);
         this._windowResize = this._windowResize.bind(this);
+    }
+
+    componentWillMount() {
+        //this._receiveData();
     }
 
     componentDidMount() {
@@ -35,12 +44,14 @@ export default class App extends PureComponent {
         });
 
         // this._drawAttack();
-        this._receiveData();
+        
 
         window.addEventListener('resize', this._windowResize);
     }
 
     componentDidUpdate(prevProps, prevState) {
+        this._receiveData();
+        //console.log("props update",this.props)
     }
 
     componentWillUnmount() {
@@ -187,74 +198,71 @@ export default class App extends PureComponent {
     /**
      * websocket.
      */
-    _receiveData() {
+    _receiveData = () => {
         let _this = this;
 
-        if (window.webSocket) {
-            //后台触发link事件,传送关联信息.
-            window.webSocket.on('link', function (data) {
-                if (!data) {
-                    return;
-                }
+        //console.log(this.props.info )
+        if( this.props.info.error ) return
 
-                let { from, to, origin, target, type, live } = JSON.parse(data.info);
+        //let { from, to, origin, target, type, live } = JSON.parse(data.info);
+        let { from, to, origin, target, type, live } = this.props.info;
 
-                let fpoint = _this.map.latLngToContainerPoint([from.lat, from.lng]);
-                let tpoint = _this.map.latLngToContainerPoint([to.lat, to.lng]);
 
-                let fp = new AnimatePoints({
-                    r: Math.random() * 10 + 10,
-                    x: fpoint.x,
-                    y: fpoint.y,
-                    lineWidth: 1,
-                    fill: Config.gradient,
-                    loop: false,
-                    callback: function () {
-                        _this.zr.remove(fp);
-                    }
-                }).render();
+        let fpoint = _this.map.latLngToContainerPoint([from.lat, from.lng]);
+        let tpoint = _this.map.latLngToContainerPoint([to.lat, to.lng]);
 
-                let tp = new AnimatePoints({
-                    r: Math.random() * 10 + 10,
-                    x: tpoint.x,
-                    y: tpoint.y,
-                    lineWidth: 1,
-                    fill: Config.gradient,
-                    loop: false,
-                    callback: function () {
-                        _this.zr.remove(tp);
-                    }
-                }).render();
+        let fp = new AnimatePoints({
+            r: Math.random() * 10 + 10,
+            x: fpoint.x,
+            y: fpoint.y,
+            lineWidth: 1,
+            fill: Config.gradient,
+            loop: false,
+            callback: function () {
+                _this.zr.remove(fp);
+            }
+        }).render();
 
-                let link = new Link({
-                    from: {
-                        x: fpoint.x,
-                        y: fpoint.y
-                    },
-                    to: {
-                        x: tpoint.x,
-                        y: tpoint.y
-                    },
-                    stroke: 'rgba(0, 0, 0, 0)',
-                }).render();
+        let tp = new AnimatePoints({
+            r: Math.random() * 10 + 10,
+            x: tpoint.x,
+            y: tpoint.y,
+            lineWidth: 1,
+            fill: Config.gradient,
+            loop: false,
+            callback: function () {
+                _this.zr.remove(tp);
+            }
+        }).render();
 
-                let flightLine = null;
-                let attackLine = new AttackLine({
-                    link: link,
-                    size: 3,
-                    loop: false,
-                    callback: function () {
-                        _this.zr.remove(link);
-                        _this.zr.remove(flightLine);
-                    }
-                });
+        let link = new Link({
+            from: {
+                x: fpoint.x,
+                y: fpoint.y
+            },
+            to: {
+                x: tpoint.x,
+                y: tpoint.y
+            },
+            stroke: 'rgba(0, 0, 0, 0)',
+        }).render();
 
-                flightLine = attackLine.render();
-                _this.zr.add(flightLine);
-                _this.zr.add(fp);
-                _this.zr.add(tp);
-            });
-        }
+        let flightLine = null;
+        let attackLine = new AttackLine({
+            link: link,
+            size: 3,
+            loop: false,
+            callback: function () {
+                _this.zr.remove(link);
+                _this.zr.remove(flightLine);
+            }
+        });
+
+        flightLine = attackLine.render();
+        _this.zr.add(flightLine);
+        _this.zr.add(fp);
+        _this.zr.add(tp);
+
     }
 
     /**
