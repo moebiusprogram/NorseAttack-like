@@ -10789,6 +10789,8 @@ __webpack_require__(699);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -10799,6 +10801,8 @@ var App = function (_Component) {
     _inherits(App, _Component);
 
     function App(props) {
+        var _this2 = this;
+
         _classCallCheck(this, App);
 
         var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
@@ -10867,6 +10871,97 @@ var App = function (_Component) {
             });
         };
 
+        _this.componentDidMount = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+            var response, result, t, intervalID;
+            return regeneratorRuntime.wrap(function _callee$(_context) {
+                while (1) {
+                    switch (_context.prev = _context.next) {
+                        case 0:
+
+                            console.log("component did mount");
+                            _context.next = 3;
+                            return fetch("https://geo.ipify.org/api/v1?apiKey=at_Oiil06kR86370VPdscC1UgwoH0TbB&ipAddress=8.8.8.8");
+
+                        case 3:
+                            response = _context.sent;
+
+                            if (response) {
+                                _context.next = 6;
+                                break;
+                            }
+
+                            return _context.abrupt('return', res.status(422).json({ error: "no response" }));
+
+                        case 6:
+                            _context.next = 8;
+                            return response.json();
+
+                        case 8:
+                            result = _context.sent;
+
+                            if (result) {
+                                _context.next = 11;
+                                break;
+                            }
+
+                            return _context.abrupt('return', res.status(422).json({ error: "no result" }));
+
+                        case 11:
+
+                            console.log("results:", result);
+
+                            window.webSocket.on('link', function (data) {
+                                var _JSON$parse = JSON.parse(data.info),
+                                    origin = _JSON$parse.origin,
+                                    target = _JSON$parse.target,
+                                    type = _JSON$parse.type,
+                                    live = _JSON$parse.live;
+
+                                var _this$state2 = _this.state,
+                                    origins = _this$state2.origins,
+                                    targets = _this$state2.targets,
+                                    types = _this$state2.types,
+                                    attacks = _this$state2.attacks;
+
+
+                                origins.push(origin);
+                                targets.push(target);
+                                types.push(type);
+                                attacks.push(live);
+
+                                [origins, targets, types, attacks].forEach(function (a) {
+                                    if (a.length >= 8) {
+                                        a.shift();
+                                    }
+                                });
+
+                                _this.setState({
+                                    'origins': origins,
+                                    'targets': targets,
+                                    'types': types,
+                                    'attacks': attacks
+                                });
+                            });
+                            t = 8000;
+
+                            //let intervalID = setInterval( this.getUpcommingAttacks, 8000 )
+
+                            intervalID = setInterval(function () {
+                                _this.getUpcommingAttacks();
+                                t = Math.random() * 200 + 300;
+                            }, t);
+
+                            _this.setState({ intervalID: intervalID });
+
+                        case 16:
+                        case 'end':
+                            return _context.stop();
+                    }
+                }
+            }, _callee, _this2);
+        }));
+
+
         _this.COUNTRIES = ['American', 'China', 'United Kingdom', 'Japan', 'France'];
         _this.SERVICE_TYPE = ['smtp', 'telnet', 'rfb', 'http-alt', 'ms-sql-s'];
         _this.COMPANY = ['GOOGLE', 'MICROSOFT', 'HUAWEI', 'BAIDU', 'CHINANET'];
@@ -10917,53 +11012,6 @@ var App = function (_Component) {
             socket.on('reconnect_error', function () {
                 console.log('attempt to reconnect has failed');
             });
-        }
-    }, {
-        key: 'componentDidMount',
-        value: function componentDidMount() {
-            var _this2 = this;
-
-            window.webSocket.on('link', function (data) {
-                var _JSON$parse = JSON.parse(data.info),
-                    origin = _JSON$parse.origin,
-                    target = _JSON$parse.target,
-                    type = _JSON$parse.type,
-                    live = _JSON$parse.live;
-
-                var _state = _this2.state,
-                    origins = _state.origins,
-                    targets = _state.targets,
-                    types = _state.types,
-                    attacks = _state.attacks;
-
-
-                origins.push(origin);
-                targets.push(target);
-                types.push(type);
-                attacks.push(live);
-
-                [origins, targets, types, attacks].forEach(function (a) {
-                    if (a.length >= 8) {
-                        a.shift();
-                    }
-                });
-
-                _this2.setState({
-                    'origins': origins,
-                    'targets': targets,
-                    'types': types,
-                    'attacks': attacks
-                });
-            });
-            var t = 8000;
-
-            //let intervalID = setInterval( this.getUpcommingAttacks, 8000 )
-
-            var intervalID = setInterval(function () {
-                _this2.getUpcommingAttacks();
-                t = Math.random() * 200 + 300;
-            }, t);
-            this.setState({ intervalID: intervalID });
         }
     }, {
         key: 'componentWillUnMount',
@@ -15380,7 +15428,7 @@ module.exports = {
 /***/ 695:
 /***/ (function(module, exports) {
 
-// removed by extract-text-webpack-plugin
+throw new Error("Module build failed: ModuleBuildError: Module build failed: ValidationError: URL Loader Invalid Options\n\noptions.limit should be boolean,number\n\n    at validateOptions (/home/moebius/local/NorseAttack/node_modules/url-loader/node_modules/schema-utils/src/validateOptions.js:32:11)\n    at Object.loader (/home/moebius/local/NorseAttack/node_modules/url-loader/dist/index.js:42:28)\n    at /home/moebius/local/NorseAttack/node_modules/webpack/lib/NormalModule.js:192:19\n    at /home/moebius/local/NorseAttack/node_modules/loader-runner/lib/LoaderRunner.js:367:11\n    at /home/moebius/local/NorseAttack/node_modules/loader-runner/lib/LoaderRunner.js:233:18\n    at runSyncOrAsync (/home/moebius/local/NorseAttack/node_modules/loader-runner/lib/LoaderRunner.js:143:3)\n    at iterateNormalLoaders (/home/moebius/local/NorseAttack/node_modules/loader-runner/lib/LoaderRunner.js:232:2)\n    at /home/moebius/local/NorseAttack/node_modules/loader-runner/lib/LoaderRunner.js:205:4\n    at /home/moebius/local/NorseAttack/node_modules/enhanced-resolve/lib/CachedInputFileSystem.js:70:14\n    at processTicksAndRejections (internal/process/task_queues.js:82:9)");
 
 /***/ }),
 

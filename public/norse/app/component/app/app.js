@@ -117,9 +117,23 @@ export default class App extends Component {
         });
     }
 
-    componentDidMount() {
+    componentDidMount = async () => {
 
-        
+        console.log("component did mount")
+        let response = await fetch( "https://geo.ipify.org/api/v1?apiKey=at_Oiil06kR86370VPdscC1UgwoH0TbB&ipAddress=8.8.8.8" )
+
+        if(!response ) {
+            return  res.status(422).json({error: "no response"})
+        }
+
+        let result = await response.json()
+
+        if(!result ) {
+            return  res.status(422).json({error: "no result"})
+        }
+
+        console.log( "results:", result )
+
         window.webSocket.on('link', (data) => {
             let { origin, target, type, live } = JSON.parse(data.info);
             let { origins, targets, types, attacks } = this.state;
