@@ -69,6 +69,8 @@
     "zrender": "^3.4.4"
   },
   "dependencies": {
+    "@babel/plugin-transform-runtime": "^7.4.4",
+    "@babel/runtime": "^7.4.5",
     "autoprefixer": "^9.6.0",
     "echarts": "^4.0.4",
     "echarts-gl": "^1.1.0",

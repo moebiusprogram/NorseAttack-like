@@ -1,7 +1,11 @@
 {
-  "presets": [
-      "react",
-      "es2016", 
-      "stage-0"
-   ]
+   "presets": [
+        "@babel/env",
+        "@babel/typescript"
+    ],
+    "plugins": [
+        "@babel/plugin-transform-runtime",
+        "@babel/proposal-class-properties",
+        "@babel/proposal-object-rest-spread"
+    ]
 }
