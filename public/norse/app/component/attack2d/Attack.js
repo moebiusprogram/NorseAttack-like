@@ -44,8 +44,6 @@ export default class App extends PureComponent {
         });
 
         // this._drawAttack();
-        
-
         window.addEventListener('resize', this._windowResize);
     }
 
