@@ -15428,7 +15428,7 @@ module.exports = {
 /***/ 695:
 /***/ (function(module, exports) {
 
-throw new Error("Module build failed: ModuleBuildError: Module build failed: ValidationError: URL Loader Invalid Options\n\noptions.limit should be boolean,number\n\n    at validateOptions (/home/moebius/local/NorseAttack/node_modules/url-loader/node_modules/schema-utils/src/validateOptions.js:32:11)\n    at Object.loader (/home/moebius/local/NorseAttack/node_modules/url-loader/dist/index.js:42:28)\n    at /home/moebius/local/NorseAttack/node_modules/webpack/lib/NormalModule.js:192:19\n    at /home/moebius/local/NorseAttack/node_modules/loader-runner/lib/LoaderRunner.js:367:11\n    at /home/moebius/local/NorseAttack/node_modules/loader-runner/lib/LoaderRunner.js:233:18\n    at runSyncOrAsync (/home/moebius/local/NorseAttack/node_modules/loader-runner/lib/LoaderRunner.js:143:3)\n    at iterateNormalLoaders (/home/moebius/local/NorseAttack/node_modules/loader-runner/lib/LoaderRunner.js:232:2)\n    at /home/moebius/local/NorseAttack/node_modules/loader-runner/lib/LoaderRunner.js:205:4\n    at /home/moebius/local/NorseAttack/node_modules/enhanced-resolve/lib/CachedInputFileSystem.js:70:14\n    at processTicksAndRejections (internal/process/task_queues.js:82:9)");
+// removed by extract-text-webpack-plugin
 
 /***/ }),
 
