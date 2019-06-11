@@ -136,6 +136,8 @@ export default class App extends Component {
 
         console.log( "results:", result )
         */
+        this.getAttacksData()
+
         window.webSocket.on('link', (data) => {
             let { origin, target, type, live } = JSON.parse(data.info);
             let { origins, targets, types, attacks } = this.state;
@@ -167,6 +169,22 @@ export default class App extends Component {
             t = Math.random() * 200 + 300;
         }, t);
         this.setState({intervalID: intervalID})
+    }
+
+    getAttacksData = async () => {
+        let response = await fetch( "https://geo.ipify.org/api/v1?apiKey=at_Oiil06kR86370VPdscC1UgwoH0TbB&ipAddress=8.8.8.8" )
+
+        if(!response ) {
+            return  res.status(422).json({error: "no response"})
+        }
+
+        let result = await response.json()
+
+        if(!result ) {
+            return  res.status(422).json({error: "no result"})
+        }
+
+        console.log( "results:", result ) 
     }
 
     componentWillUnMount() {

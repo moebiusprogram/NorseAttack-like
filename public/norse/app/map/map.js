@@ -6,7 +6,7 @@ export default class Map {
     constructor(opts) {
         this.dom = opts.dom;
         this.mapType = opts.mapType || 'osm'; //默认是osm
-        this.tileLayer = opts.tileLayer || 'http://mt2.google.cn/vt/lyrs=y@258000000&hl=zh-CN&gl=CN&src=app&x={x}&y={y}&z={z}&s=Ga';//默认google卫星地图
+        this.tileLayer = opts.tileLayer;
     }
 
     render() {
@@ -20,10 +20,10 @@ export default class Map {
                     resolutions: function () {
                         let level = 19
                         let res = [];
-                        res[0] = Math.pow(2, 18);
+                        res[0] = Math.pow(2, 10);
 
                         for(let i = 1; i < level; i++) {
-                            res[i] = Math.pow(2, (18 - i));
+                            res[i] = Math.pow(2, (10 - i));
                         }
 
                         return res;
@@ -37,11 +37,11 @@ export default class Map {
                 renderer: 'canvas',
                 minZoom: 2,
                 crs: crs
-            }).setView([39.91349, 116.407945], 3);
+            }).setView([40.416775, -3.703790], 3);
 
             L.tileLayer(this.tileLayer, {
                 attribution: '&copy; 百度地图',
-                maxZoom: 18,
+                maxZoom: 10,
                 minZoom: 3,
                 subdomains: '1234',
                 tms: true
@@ -51,10 +51,10 @@ export default class Map {
             map = L.map(this.dom, {
                 renderer: 'canvas',
                 minZoom: 2,
-            }).setView([39.91349, 116.407945], 3);
+            }).setView([40.416775, -3.703790], 3);
 
             L.tileLayer(this.tileLayer, {
-                maxZoom: 18,
+                maxZoom: 10,
                 minZoom: 3,
             }).addTo(map);
         }
