@@ -2,7 +2,7 @@
  * if or not web browser support webgl. Code from Three.js.
  */
 
-var Detector = {
+let Detector = {
 
     canvas: !!window.CanvasRenderingContext2D,
     webgl: (function () {
@@ -69,9 +69,4 @@ var Detector = {
 
 };
 
-// browserify support
-if (typeof module === 'object') {
-
-    module.exports = Detector;
-
-}
+export default Detector
