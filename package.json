@@ -81,6 +81,7 @@
     "babel-preset-env": "^1.7.0",
     "echarts": "^4.0.4",
     "echarts-gl": "^1.1.0",
-    "express-ws": "^4.0.0"
+    "express-ws": "^4.0.0",
+    "moment": "^2.24.0"
   }
 }

@@ -4,6 +4,7 @@ import Globe from '../attack3d/Globe';
 import InfoContainer from '../InfoContainer/InfoContainer';
 import InfoPanel from '../InfoPanel/InfoPanel';
 import io from 'socket.io-client';
+import moment from 'moment'
 import React, { Component } from 'react';
 import 'normalize.css';
 import './app.scss';
@@ -17,6 +18,8 @@ export default class App extends Component {
         this.COMPANY = ['GOOGLE', 'MICROSOFT', 'HUAWEI', 'BAIDU', 'CHINANET'];
 
         this.state = {
+            hits: [],
+            index: 0,
             actualInfo: { error: true },
             nodes: {},
             edges: [],
@@ -43,8 +46,6 @@ export default class App extends Component {
 
 
         socket.on('connect', (c) => {
-            console.log("连接成功..." + new Date().getTime());
-            console.log("Conectado")
             socket.emit('hello', 'hello world!');
         });
 
@@ -62,39 +63,46 @@ export default class App extends Component {
     }
 
     getUpcommingAttacks = () => {
+
+        //this.hits[index]._source[""]
+        let hit = this.state.hits[this.state.index]
+
+
         let info = {
             'from': {
                 // 'lat': $('#flat').val(),
                 // 'lng': $('#flng').val()
-                'lat': Math.random() * 160 - 80,
-                'lng': Math.random() * 360 - 180,
+                'lat': hit._source["enrichments:geo:ip_src_addr:latitude"],
+                'lng': hit._source["enrichments:geo:ip_src_addr:longitude"]
             },
             'to': {
                 // 'lat': $('#tlat').val(),
                 // 'lng': $('#tlng').val()
-                'lat': Math.random() * 160 - 80,
-                'lng': Math.random() * 360 - 180
+                'lat': hit._source["enrichments:geo:ip_dst_addr:latitude"],
+                'lng': hit._source["enrichments:geo:ip_dst_addr:longitude"]
             },
             'origin': {
-                'N': Math.floor(Math.random() * 60),
-                'COUNTRY': this.COUNTRIES[Math.floor(Math.random() * this.COUNTRIES.length)]
+                'N': "",
+                'COUNTRY': hit._source["enrichments:geo:ip_src_addr:country"]
             },
             'target': {
-                'N': Math.floor(Math.random() * 60),
-                'COUNTRY': this.COUNTRIES[Math.floor(Math.random() * this.COUNTRIES.length)]
+                'N': "",
+                'COUNTRY': hit._source["enrichments:geo:ip_dst_addr:country"]
             },
             'type': {
-                'N': Math.floor(Math.random() * 60),
-                'PORT': Math.floor(Math.random() * 0xffff),
-                'SERVICE TYPE': this.SERVICE_TYPE[Math.floor(Math.random() * this.SERVICE_TYPE.length)]
+                'N': hit._source["threat:triage:score"],
+                'PORT': hit._source["ip_dst_port"],
+                'SERVICE TYPE': hit._source["msg"]
             },
             'live': {
-                'TIMESTAMP': new Date().toString(),
-                'ATTACKER': this.COMPANY[Math.floor(Math.random() * this.COMPANY.length)]
+                'TIMESTAMP': moment(hit._source["timestamp"]).format("DD-MM-YYYY HH:mm:ss"),
+                'ATTACKER': hit._source["protocol"]
             }
         }
 
-        let { origin, target, type, live } = info;
+        //new Date(unix_tm*1000)
+        // moment(1439198499).format("DD-MM-YYYY HH:mm:ss")
+        let { from, to, origin, target, type, live } = info;
         let { origins, targets, types, attacks } = this.state;
 
         origins.push(origin);
@@ -108,34 +116,24 @@ export default class App extends Component {
             }
         });
 
+        let index = 0
+
+        if( this.state.index < this.state.hits.length ) {
+            index  = this.state.index + 1
+        }
+        
         this.setState({
             'origins': origins,
             'targets': targets,
             'types': types,
             'attacks': attacks,
-            'actualInfo': info
+            'actualInfo': info,
+            'index': index,
         });
     }
 
     componentDidMount() {
 
-        console.log("component did mount")
-
-        /*
-        let response = await fetch( "https://geo.ipify.org/api/v1?apiKey=at_Oiil06kR86370VPdscC1UgwoH0TbB&ipAddress=8.8.8.8" )
-
-        if(!response ) {
-            return  res.status(422).json({error: "no response"})
-        }
-
-        let result = await response.json()
-
-        if(!result ) {
-            return  res.status(422).json({error: "no result"})
-        }
-
-        console.log( "results:", result )
-        */
         this.getAttacksData()
 
         window.webSocket.on('link', (data) => {
@@ -172,7 +170,43 @@ export default class App extends Component {
     }
 
     getAttacksData = async () => {
-        let response = await fetch( "https://geo.ipify.org/api/v1?apiKey=at_Oiil06kR86370VPdscC1UgwoH0TbB&ipAddress=8.8.8.8" )
+  
+          try{
+
+              const urlRoute =  `/api/v1/overview/metron/snort/search/24h`
+
+              const response = await fetch( urlRoute )
+
+              const results = await response.json()
+
+              if(results && results.hits) {
+
+
+                console.log("Hits:", results.hits)
+                this.setState({
+                    hits: results.hits.hits
+                })
+
+              } else {
+
+                this.setState({
+                    loadingError: true,
+                })
+              }
+
+          } catch(e) {
+              console.log("error", e)
+
+               this.setState({
+                    loadingError: true,
+                })
+          }
+
+    }
+
+    getGeoCoordinatesFromIP = async (ip) => {
+
+        let response = await fetch( `https://geo.ipify.org/api/v1?apiKey=at_Oiil06kR86370VPdscC1UgwoH0TbB&ipAddress=${ip}` )
 
         if(!response ) {
             return  res.status(422).json({error: "no response"})
@@ -185,7 +219,11 @@ export default class App extends Component {
         }
 
         console.log( "results:", result ) 
+
+        return result
+
     }
+
 
     componentWillUnMount() {
         if(window.webSocket) {
