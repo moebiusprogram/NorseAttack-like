@@ -80,7 +80,7 @@
     "i": "^0.3.7",
     "mini-css-extract-plugin": "^2.4.5",
     "moment": "^2.24.0",
-    "npm": "^8.2.0",
+    "npm": "^8.11.0",
     "sass": "^1.44.0",
     "sass-loader": "^12.3.0",
     "url-loader": "^4.1.1"
